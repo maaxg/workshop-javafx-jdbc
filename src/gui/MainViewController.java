@@ -11,10 +11,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class MainViewController implements Initializable {
 
@@ -32,14 +34,20 @@ public class MainViewController implements Initializable {
     @FXML
     //A event handler
     public void onMenuItemDepartmentAction(){
-        loadView("/gui/DepartmentList.fxml");
+        //Temporary loadview
+        loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
+            controller.setDepartmentService(new DepartmentService());
+            controller.updateTableView();
+
+            });
     }
     @FXML
     //A event handler
     public void onMenuItemAboutAction(){
-       loadView("/gui/About.fxml");
+       loadView("/gui/About.fxml", x -> {});
     }
-    private synchronized void loadView(String absoluteName){
+                        //Generics o loadView virou uma função generica parametrizada como um tipo qualquer
+    private synchronized <T> void loadView(String absoluteName, Consumer<T> initializingAction){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
             VBox newVbox = loader.load();
@@ -65,8 +73,11 @@ public class MainViewController implements Initializable {
              */
             mainVBox.getChildren().add(mainMenu);
             mainVBox.getChildren().addAll(newVbox.getChildren());
+                    //Take the controller from the action that was passed;
+            T controller = loader.getController();
+            initializingAction.accept(controller);
 
-        }catch (IOException ex){
+        } catch (IOException ex){
             Alerts.showAlert("IO Exception", "Error loading view", ex.getMessage(), Alert.AlertType.ERROR);
         }
     }
