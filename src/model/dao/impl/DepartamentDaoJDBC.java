@@ -1,6 +1,7 @@
 package model.dao.impl;
 
 import db.DB;
+import db.DBIntegrityException;
 import db.DbException;
 import model.dao.DepartmentDao;
 import model.entities.Department;
@@ -80,13 +81,10 @@ public class DepartamentDaoJDBC implements DepartmentDao {
 
             stmt.setInt(1, id);
 
-            int rows = stmt.executeUpdate();
-            if(rows == 0){
-                throw new DbException("Id don't exists");
-            }
+            stmt.executeUpdate();
 
         }catch (SQLException ex){
-            throw new DbException(ex.getMessage());
+            throw new DBIntegrityException(ex.getMessage());
         }finally {
             DB.closeConnection(stmt);
         }
