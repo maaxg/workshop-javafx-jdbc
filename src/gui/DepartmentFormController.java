@@ -2,6 +2,7 @@ package gui;
 
 import com.mysql.cj.ServerVersion;
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -16,6 +17,8 @@ import model.entities.Department;
 import model.services.DepartmentService;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DepartmentFormController implements Initializable {
@@ -24,6 +27,7 @@ public class DepartmentFormController implements Initializable {
 
     private DepartmentService service;
 
+    private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 
     @FXML
     private TextField txtId;
@@ -43,6 +47,11 @@ public class DepartmentFormController implements Initializable {
     public void setDepartmentService(DepartmentService service){
         this.service = service;
     }
+
+    public void subscribeDataChangeListenes(DataChangeListener listener){
+        dataChangeListeners.add(listener);
+    }
+
     @FXML
     public void onBtSaveAction(ActionEvent ev){
         if (entity == null){
@@ -54,9 +63,16 @@ public class DepartmentFormController implements Initializable {
         try {
             entity = getFormData();
             service.saveOrUpdate(entity);
+            notifyDataChangeListeners();
             Utils.currentStage(ev).close();
         }catch (DbException ex){
             Alerts.showAlert("Error saving object", null, ex.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    private void notifyDataChangeListeners() {
+        for (DataChangeListener listener : dataChangeListeners){
+            listener.onDataChanged();
         }
     }
 
