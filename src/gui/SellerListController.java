@@ -2,6 +2,7 @@ package gui;
 
 import application.Main;
 import db.DBIntegrityException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class SellerListController implements Initializable {
+public class SellerListController implements Initializable, DataChangeListener {
     private SellerService service  /* acoplamento forte new DepartmentService) */;
     @FXML
     private Button btNew;
@@ -64,7 +65,7 @@ public class SellerListController implements Initializable {
         Stage parentStage = Utils.currentStage(event);
         Seller obj = new Seller();
 
-       // createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage );
+       createDialogForm(obj, "/gui/SellerForm.fxml", parentStage );
     }
 
     @Override
@@ -102,18 +103,18 @@ public class SellerListController implements Initializable {
         List<Seller> list = service.findAll();
         obsList = FXCollections.observableArrayList(list);
         tableViewSeller.setItems(obsList);
-        //initEditButtons();
+        initEditButtons();
         initRemoveButtons();
     }
     //reference to Parent stage from dialog
-   /* private void createDialogForm(Seller obj, String absoluteName, Stage parentStage){
+    private void createDialogForm(Seller obj, String absoluteName, Stage parentStage){
         try{
             FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
             Pane pane = loader.load();
 
-            DepartmentFormController controller = loader.getController();
-            controller.setDepartment(obj);
-            controller.setDepartmentService(new DepartmentService());
+            SellerFormController controller = loader.getController();
+            controller.setSeller(obj);
+            controller.setSellerService(new SellerService());
             controller.subscribeDataChangeListenes(this);
             controller.updateFormData();
 
@@ -133,12 +134,12 @@ public class SellerListController implements Initializable {
             Alerts.showAlert("IO Exception", "Error loading view", ex.getMessage(), Alert.AlertType.ERROR);
         }
 
-    }*/
+    }
 
-   /* @Override
+    @Override
     public void onDataChanged() {
         updateTableView();
-    }*/
+    }
 
     private void initEditButtons() {
         tableColumnEdit.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
@@ -152,9 +153,9 @@ public class SellerListController implements Initializable {
                     return;
                 }
                 setGraphic(button);
-              /*  button.setOnAction(
+                button.setOnAction(
                         event -> createDialogForm(
-                                obj, "/gui/DepartmentForm.fxml",Utils.currentStage(event)));*/
+                                obj, "/gui/SellerForm.fxml",Utils.currentStage(event)));
             }
         });
     }
